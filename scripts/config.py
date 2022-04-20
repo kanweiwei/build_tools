@@ -65,9 +65,9 @@ def parse():
 
   # check vs-path
   if ("windows" == host_platform):
-    options["vs-path"] = base.get_env("ProgramFiles") + "/Microsoft Visual Studio 14.0/VC"
+    options["vs-path"] = base.get_env("ProgramFiles") + base.get_path("/Microsoft Visual Studio 14.0/VC")
     if ("" != base.get_env("ProgramFiles(x86)")):
-      options["vs-path"] = base.get_env("ProgramFiles(x86)") + "/Microsoft Visual Studio 14.0/VC"
+      options["vs-path"] = base.get_env("ProgramFiles(x86)") + base.get_path("/Microsoft Visual Studio 14.0/VC")
 
   # check sdkjs-plugins
   if not "sdkjs-plugin" in options:

@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 
 import sys
-sys.path.append('../..')
-import config
-import base
 import os
+sys.path.append(os.path.join('..', '..'))
+import base
 import build
 
 def make(src_dir, modules, build_platform="android"):

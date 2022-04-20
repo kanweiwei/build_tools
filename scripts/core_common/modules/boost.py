@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
 import sys
-sys.path.append('../..')
+import os
+sys.path.append(os.path.join('..', '..'))
 import config
 import base
-import os
 import glob
 import boost_qt
 
@@ -67,16 +67,20 @@ def make():
   # build
   if ("windows" == base.host_platform()):
     win_toolset = "msvc-14.0"
-    if (-1 != config.option("platform").find("win_64")) and not base.is_dir("../build/win_64"):      
+    if (-1 != config.option("platform").find("win_64")) and not base.is_dir("../build/win_64"):
+      base.vcvarsall_start("x64")
       base.cmd("bootstrap.bat", ["vc14"])
       base.cmd("b2.exe", ["headers"])
       base.cmd("b2.exe", ["--clean"])
       base.cmd("b2.exe", ["--prefix=./../build/win_64", "link=static", "--with-filesystem", "--with-system", "--with-date_time", "--with-regex", "--toolset=" + win_toolset, "address-model=64", "install"])
+      base.vcvarsall_end()
     if (-1 != config.option("platform").find("win_32")) and not base.is_dir("../build/win_32"):
+      base.vcvarsall_start("x86")
       base.cmd("bootstrap.bat", ["vc14"])
       base.cmd("b2.exe", ["headers"])
       base.cmd("b2.exe", ["--clean"])
       base.cmd("b2.exe", ["--prefix=./../build/win_32", "link=static", "--with-filesystem", "--with-system", "--with-date_time", "--with-regex", "--toolset=" + win_toolset, "address-model=32", "install"])
+      base.vcvarsall_end()
     correct_install_includes_win(base_dir, "win_64")
     correct_install_includes_win(base_dir, "win_32")    
 

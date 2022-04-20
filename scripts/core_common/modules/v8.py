@@ -1,18 +1,17 @@
 #!/usr/bin/env python
 
 import sys
-sys.path.append('../..')
+import os
+sys.path.append(os.path.join('..', '..'))
 import config
 import base
-import os
-import subprocess
 
 def clean():
   if base.is_dir("depot_tools"):
-    base.delete_dir_with_access_error("depot_tools");
+    base.delete_dir_with_access_error("depot_tools")
     base.delete_dir("depot_tools")
   if base.is_dir("v8"):
-    base.delete_dir_with_access_error("v8");
+    base.delete_dir_with_access_error("v8")
     base.delete_dir("v8")
   if base.is_exist("./.gclient"):
     base.delete_file("./.gclient")
@@ -58,7 +57,7 @@ def make():
     make_xp()
     return
 
-  base_dir = base.get_script_dir() + "/../../core/Common/3dParty/v8"
+  base_dir = base.get_script_dir() + base.get_path("/../../core/Common/3dParty/v8")
   if ("ios" == config.option("platform")):
     return
 
@@ -92,16 +91,22 @@ def make():
       if base.is_file("depot_tools/cipd.ps1"):
         base.replaceInFile("depot_tools/cipd.ps1", "windows-386", "windows-amd64")
 
-  os.environ["PATH"] = base_dir + "/depot_tools" + os.pathsep + os.environ["PATH"]
+  os.environ["PATH"] = base_dir + base.get_path("/depot_tools") + os.pathsep + os.environ["PATH"]
 
   if not base.is_dir("v8/out.gn"):
-    base.cmd("gclient")
+    if ("windows" == base.host_platform()):
+      base.cmd("./depot_tools/gclient.bat")
+    else:
+      base.cmd("gclient")
 
   # --------------------------------------------------------------------------
   # fetch
   if not base.is_dir("v8"):
-    base.cmd("./depot_tools/fetch", ["v8"], True)
-    os.chdir(base_dir + "/v8")
+    if ("windows" == base.host_platform()):
+     base.cmd("./depot_tools/fetch.bat", ["v8"], True)
+    else:
+       base.cmd("./depot_tools/fetch", ["v8"], True)
+    os.chdir(base_dir + base.get_path("/v8"))
     base.cmd("git", ["checkout", "-b", "6.0", "branch-heads/6.0"], True)
     os.chdir(base_dir)
 
@@ -111,9 +116,9 @@ def make():
     
     # windows hack (delete later) ----------------------
     if ("windows" == base.host_platform()):
-      base.delete_dir_with_access_error("v8/buildtools/win")
+      base.delete_dir_with_access_error(base.get_path("v8/buildtools/win"))
       base.cmd("git", ["config", "--system", "core.longpaths", "true"])
-      base.cmd("gclient", ["sync", "--force"], True)
+      base.cmd("./depot_tools/gclient.bat", ["sync", "--force"], True)
     else:
       base.cmd("gclient", ["sync"], True) 
 
@@ -174,20 +179,24 @@ def make():
     base.cmd("ninja", ["-C", "out.gn/mac_64"])
 
   if config.check_option("platform", "win_64"):
+    base.vcvarsall_start("x64")
     if (-1 != config.option("config").lower().find("debug")):
-      base.cmd2("gn", ["gen", "out.gn/win_64/debug", "--args=\"is_debug=true " + base_args64 + " is_clang=false\""])
-      base.cmd("ninja", ["-C", "out.gn/win_64/debug"])      
+      base.cmd2("../depot_tools/gn.bat", ["gen", base.get_path("out.gn/win_64/debug"), "--args=\"is_debug=true " + base_args64 + " is_clang=false\""])
+      base.cmd("../depot_tools/ninja.exe", ["-C", base.get_path("out.gn/win_64/debug")])
 
-    base.cmd2("gn", ["gen", "out.gn/win_64/release", "--args=\"is_debug=false " + base_args64 + " is_clang=false\""])
-    base.cmd("ninja", ["-C", "out.gn/win_64/release"])
+    base.cmd2("../depot_tools/gn.bat", ["gen", base.get_path("out.gn/win_64/release"), "--args=\"is_debug=false " + base_args64 + " is_clang=false\""])
+    base.cmd("../depot_tools/ninja.exe", ["-C", base.get_path("out.gn/win_64/release")])
+    base.vcvarsall_end()
 
   if config.check_option("platform", "win_32"):
+    base.vcvarsall_start("x86")
     if (-1 != config.option("config").lower().find("debug")):
-      base.cmd2("gn", ["gen", "out.gn/win_32/debug", "--args=\"is_debug=true " + base_args32 + " is_clang=false\""])
-      base.cmd("ninja", ["-C", "out.gn/win_32/debug"])    
+      base.cmd2("../depot_tools/gn.bat", ["gen", base.get_path("out.gn/win_32/debug"), "--args=\"is_debug=true " + base_args32 + " is_clang=false\""])
+      base.cmd("../depot_tools/ninja.exe", ["-C", base.get_path("out.gn/win_32/debug")])
 
-    base.cmd2("gn", ["gen", "out.gn/win_32/release", "--args=\"is_debug=false " + base_args32 + " is_clang=false\""])
-    base.cmd("ninja", ["-C", "out.gn/win_32/release"])
+    base.cmd2("../depot_tools/gn.bat", ["gen", base.get_path("out.gn/win_32/release"), "--args=\"is_debug=false " + base_args32 + " is_clang=false\""])
+    base.cmd("../depot_tools/ninja.exe", ["-C", base.get_path("out.gn/win_32/release")])
+    base.vcvarsall_end()
 
   os.chdir(old_cur)
   os.environ.clear()
@@ -257,7 +266,7 @@ def make_xp():
     "for file in projects:",
     "  replaceInFile(file, '<RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>', '<RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>')",
     "  replaceInFile(file, '<RuntimeLibrary>MultiThreaded</RuntimeLibrary>', '<RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>')",
-    ]);
+    ])
 
   if config.check_option("platform", "win_64_xp"):
     if not base.is_dir("win_64/release"):

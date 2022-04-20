@@ -5,7 +5,6 @@ sys.path.append('modules')
 sys.path.append('..')
 
 import config
-import base
 
 import boost
 import cef
@@ -25,7 +24,7 @@ def make():
   openssl.make()
   v8.make()
   html2.make()
-  hunspell.make(False)
+  hunspell.make()
   glew.make()
   if config.check_option("module", "mobile"):
     curl.make()

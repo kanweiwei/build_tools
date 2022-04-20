@@ -95,6 +95,10 @@ def make_pro_file(makefiles_dir, pro_file):
 # make build.pro
 def make():
   is_no_brandind_build = base.is_file("config")
+  base_dir = base.get_script_dir() + base.get_path('/../')
+  old_cur = os.getcwd()
+  os.chdir(base_dir)
+
   make_pro_file("makefiles", "build.pro")
   if config.check_option("module", "builder") and base.is_windows() and is_no_brandind_build:
     # check replace
@@ -110,4 +114,6 @@ def make():
     # restore
     if (replace_path_lib != ""):
       base.replaceInFile(replace_path_lib_file, replace_path_lib, "../../../build/lib/")
+
+  os.chdir(old_cur)
   return

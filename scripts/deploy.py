@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import config
-import base
 import deploy_desktop
 import deploy_builder
 import deploy_server

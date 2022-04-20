@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 
 import sys
+import os
 sys.path.append('scripts')
-sys.path.append('scripts/develop')
-sys.path.append('scripts/develop/vendor')
-sys.path.append('scripts/core_common')
-sys.path.append('scripts/core_common/modules')
+sys.path.append(os.path.join('scripts', 'develop'))
+sys.path.append(os.path.join('scripts', 'develop', 'vendor'))
+sys.path.append(os.path.join('scripts', 'core_common'))
+sys.path.append(os.path.join('scripts', 'core_common', 'modules'))
 import config
 import base
 import build
@@ -59,7 +60,7 @@ if ("1" == config.option("update")):
 base.configure_common_apps()
 
 # developing...
-develop.make();
+develop.make()
 
 # check only js builds
 if ("1" == base.get_env("OO_ONLY_BUILD_JS")):
