@@ -53,7 +53,10 @@ def set_env(name, value):
 
 def configure_common_apps(file=""):
   if ("windows" == host_platform()):
-    os.environ["PATH"] = get_script_dir(file) + "/../tools/win/7z" + os.pathsep + get_script_dir(file) + "/../tools/win/curl" + os.pathsep + get_script_dir(file) + "/../tools/win/vswhere" + os.pathsep + os.environ["PATH"]
+    os.environ["PATH"] = os.pathsep.join([get_script_dir(file) + get_path("/../tools/win/7z"),
+      get_script_dir() + get_path("/../tools/win/curl"),
+      get_script_dir(file) + get_path("/../tools/win/vswhere"),
+      os.environ["PATH"]])
   elif ("mac" == host_platform()):
     os.environ["PATH"] = get_script_dir(file) + "/../tools/mac" + os.pathsep + os.environ["PATH"]
   return
@@ -157,7 +160,7 @@ def copy_dir_content(src, dst, filterInclude = "", filterExclude = ""):
 
 def delete_file(path):
   if not is_file(path):
-    print("delete warning [file not exist]: " + path)
+    print("delete warning [file not exist]: " + get_path(path))
     return
   return os.remove(get_path(path))
 
@@ -241,20 +244,20 @@ def copy_exe(src, dst, name):
 
 def replaceInFile(path, text, textReplace):
   filedata = ""
-  with open(get_path(path), "r") as file:
+  with open(get_path(path), "r", encoding="utf-8") as file:
     filedata = file.read()
   filedata = filedata.replace(text, textReplace)
   delete_file(path)
-  with open(get_path(path), "w") as file:
+  with open(get_path(path), "w", encoding="utf-8") as file:
     file.write(filedata)
   return
 def replaceInFileRE(path, pattern, textReplace):
   filedata = ""
-  with open(get_path(path), "r") as file:
+  with open(get_path(path), "r", encoding="utf-8") as file:
     filedata = file.read()
   filedata = re.sub(pattern, textReplace, filedata)
   delete_file(path)
-  with open(get_path(path), "w") as file:
+  with open(get_path(path), "w", encoding="utf-8") as file:
     file.write(filedata)
   return
 
@@ -262,14 +265,14 @@ def readFile(path):
   if not is_file(path):
     return ""
   filedata = ""
-  with open(get_path(path), "r") as file:
+  with open(get_path(path), "r", encoding="utf-8") as file:
     filedata = file.read()
   return filedata
 
 def writeFile(path, data):
   if is_file(path):
     delete_file(path)
-  with open(get_path(path), "w") as file:
+  with open(get_path(path), "w", encoding="utf-8") as file:
     file.write(data)
   return
 
@@ -670,7 +673,7 @@ def qt_copy_plugin(name, out):
 def qt_dst_postfix():
   config_param = config.option("config").lower()
   if (-1 != config_param.find("debug")):
-    return "/debug"
+    return get_path("/debug")
   return ""
 
 # common ------------------------------------------------
@@ -893,7 +896,7 @@ def archive_folder(src, dst):
 
 # windows vcvarsall
 def _call_vcvarsall_and_return_env(arch):
-  vcvarsall = config.option("vs-path") + "/vcvarsall.bat"
+  vcvarsall = config.option("vs-path") + get_path("/vcvarsall.bat")
   interesting = set(("INCLUDE", "LIB", "LIBPATH", "PATH"))
   result = {}
 
@@ -903,7 +906,7 @@ def _call_vcvarsall_and_return_env(arch):
     stdout, stderr = popen.communicate()
     popen.wait()
 
-    lines = stdout.split("\n")
+    lines = stdout.decode('utf-8').splitlines()
     for line in lines:
       if '=' not in line:
         continue
@@ -963,7 +966,7 @@ def save_as_script(path, lines):
 def join_scripts(files, path):
   files_data = []
   for file in files:
-    with open(get_path(file), "r") as content:
+    with open(get_path(file), "r", encoding="utf-8") as content:
       files_data.append(content.read())
 
   dst_content = "\n".join(files_data)
@@ -1133,12 +1136,12 @@ def support_old_versions_plugins(out_dir):
   download("https://onlyoffice.github.io/sdkjs-plugins/v1/plugins-ui.js", out_dir + "/plugins-ui.js")
   download("https://onlyoffice.github.io/sdkjs-plugins/v1/plugins.css", out_dir + "/plugins.css")
   content_plugin_base = ""
-  with open(get_path(out_dir + "/plugins.js"), "r") as file:
+  with open(get_path(out_dir + "/plugins.js"), "r", encoding="utf-8") as file:
     content_plugin_base += file.read()
   content_plugin_base += "\n\n"
-  with open(get_path(out_dir + "/plugins-ui.js"), "r") as file:
+  with open(get_path(out_dir + "/plugins-ui.js"), "r", encoding="utf-8") as file:
     content_plugin_base += file.read()  
-  with open(get_path(out_dir + "/pluginBase.js"), "w") as file:
+  with open(get_path(out_dir + "/pluginBase.js"), "w", encoding="utf-8") as file:
     file.write(content_plugin_base)
   delete_file(out_dir + "/plugins.js")
   delete_file(out_dir + "/plugins-ui.js")  
@@ -1155,7 +1158,7 @@ def hack_xcode_ios():
   qmake_spec_file = config.option("qt-dir") + "/ios/mkspecs/macx-ios-clang/qmake.conf"
 
   filedata = ""
-  with open(get_path(qmake_spec_file), "r") as file:
+  with open(get_path(qmake_spec_file), "r", encoding="utf-8") as file:
     filedata = file.read()
 
   content_hack = "QMAKE_CXXFLAGS += -arch $$QT_ARCH"
@@ -1167,7 +1170,7 @@ def hack_xcode_ios():
   filedata += "\n\n"
   
   delete_file(qmake_spec_file)
-  with open(get_path(qmake_spec_file), "w") as file:
+  with open(get_path(qmake_spec_file), "w", encoding="utf-8") as file:
     file.write(filedata)
   return
 

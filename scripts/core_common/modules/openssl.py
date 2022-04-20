@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 import sys
-sys.path.append('../..')
+import os
+sys.path.append(os.path.join('..', '..'))
 import config
 import base
 import os
@@ -30,7 +31,7 @@ def make():
   base.common_check_version("openssl", "3", clean)
 
   if not base.is_dir("openssl"):
-    base.cmd("git", ["clone", "--depth=1", "--branch", "OpenSSL_1_1_1f", "https://github.com/openssl/openssl.git"])
+    base.cmd("git", ["clone", "--depth=1", "--branch", "OpenSSL_1_1_1-stable", "https://github.com/openssl/openssl.git"])
 
   os.chdir(base_dir + "/openssl")
 
