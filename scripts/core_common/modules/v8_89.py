@@ -61,7 +61,8 @@ def make():
   os.chdir(base_dir)
   if not base.is_dir("depot_tools"):
     base.cmd("git", ["clone", "https://chromium.googlesource.com/chromium/tools/depot_tools.git"])
-
+  print("==== v8_89 dir ==== ")
+  print(os.listdir(base_dir))
   os.environ["PATH"] = base_dir + "/depot_tools" + os.pathsep + os.environ["PATH"]
 
   if ("windows" == base.host_platform()):
@@ -74,8 +75,10 @@ def make():
       os.chdir("v8")
       base.cmd("git", ["config", "--system", "core.longpaths", "true"])
       os.chdir("../")
-    base.cmd("./depot_tools/gclient", ["sync", "-r", "remotes/branch-heads/8.9"], True)
-    base.cmd("gclient", ["sync", "--force"], True)
+    if ("windows" == base.host_platform()):
+      base.cmd("./depot_tools/gclient.bat", ["sync", "-r", "remotes/branch-heads/8.9"], True)
+    else:
+      base.cmd("gclient", ["sync", "--force"], True)
 
   if ("windows" == base.host_platform()):
     base.replaceInFile("v8/build/config/win/BUILD.gn", ":static_crt", ":dynamic_crt")
