@@ -63,7 +63,8 @@ def make():
     base.cmd("git", ["clone", "https://chromium.googlesource.com/chromium/tools/depot_tools.git"])
   print("==== v8_89 dir ==== ")
   print(os.listdir(base_dir))
-  os.environ["PATH"] = base_dir + "/depot_tools" + os.pathsep + os.environ["PATH"]
+  print(os.path.abspath(os.path.join(base_dir , "depot_tools")) )
+  os.environ["PATH"] = os.path.abspath(os.path.join(base_dir , "depot_tools")) + os.pathsep + os.environ["PATH"]
 
   if ("windows" == base.host_platform()):
     base.set_env("DEPOT_TOOLS_WIN_TOOLCHAIN", "0")
