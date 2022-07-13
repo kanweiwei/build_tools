@@ -64,9 +64,8 @@ def make():
   base.generate_doctrenderer_config("./DoctRenderer.config", "../../../sdkjs/deploy/", "server", "../../../web-apps/vendor/")
   base.support_old_versions_plugins(git_dir + "/sdkjs-plugins")
 
-  if base.is_dir(git_dir + "/fonts"):
-    base.delete_dir(git_dir + "/fonts")
-  base.create_dir(git_dir + "/fonts")
+  if not base.is_dir(git_dir + "/fonts"):
+    base.create_dir(git_dir + "/fonts")
 
   if ("mac" == base.host_platform()):
     base.mac_correct_rpath_x2t("./")
@@ -131,6 +130,15 @@ def make():
   json_file = git_dir + "/server/Common/config/local-development-" + base.host_platform() + ".json"
   base.writeFile(json_file, json.dumps({"services": {"CoAuthoring": {"server": server_config, "sql": sql}}}, indent=2))
 
+  #site url
+  example_config = {}
+  example_config["port"] = 80
+  example_config["siteUrl"] = "http://" + config.option("siteUrl") + ":8000/"
+  example_config["apiUrl"] = "web-apps/apps/api/documents/api.js"
+  example_config["preloaderUrl"] = "web-apps/apps/api/documents/cache-scripts.html"
+  json_file = git_dir + "/document-server-integration/web/documentserver-example/nodejs/config/local-development-" + base.host_platform() + ".json"
+  base.writeFile(json_file, json.dumps({"server": example_config}, indent=2))
+  
   os.chdir(old_cur)
   return
 

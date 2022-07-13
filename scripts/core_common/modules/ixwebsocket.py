@@ -11,7 +11,11 @@ current_dir = base.get_script_dir() + "/../../core/Common/3dParty/ixwebsocket"
 
 CMAKE = "cmake"
 
-def find_last_version(arr):
+def find_last_version(arr_input, base_directory):
+    arr = []
+    for arr_rec in arr_input:
+      if base.is_file(base_directory + "/" + arr_rec + "/bin/cmake"):
+        arr.append(arr_rec)
     res = arr[0]
     for version in arr:
       if(LooseVersion(version) > LooseVersion(res)):
@@ -90,8 +94,8 @@ def make():
    global CMAKE
 
    CMAKE_TOOLCHAIN_FILE = base.get_env("ANDROID_NDK_ROOT") + "/build/cmake/android.toolchain.cmake"
-   CMAKE_DIR = base.get_env("ANDROID_HOME") + "/cmake/"
-   CMAKE = CMAKE_DIR + find_last_version(os.listdir(CMAKE_DIR)) + "/bin/cmake"
+   CMAKE_DIR = base.get_android_sdk_home() + "/cmake/"
+   CMAKE = CMAKE_DIR + find_last_version(os.listdir(CMAKE_DIR), CMAKE_DIR) + "/bin/cmake"
 
    def param_android(arch, api):
     return ["-G","Unix Makefiles", "-DANDROID_NATIVE_API_LEVEL=" + api, "-DANDROID_ABI=" + arch, "-DANDROID_TOOLCHAIN=clang", "-DANDROID_NDK=" + base.get_env("ANDROID_NDK_ROOT"), "-DCMAKE_TOOLCHAIN_FILE=" + CMAKE_TOOLCHAIN_FILE, "-DCMAKE_MAKE_PROGRAM=make"]
@@ -137,19 +141,24 @@ def make():
       base.create_dir(current_dir + "/IXWebSocket/build/ios/ixwebsocket-universal/include")
       base.create_dir(current_dir + "/IXWebSocket/build/ios/ixwebsocket-universal/lib")
 
-    #copy include
-      if base.is_dir(current_dir + "/IXWebSocket/build/ios/armv7/include"):
-         base.cmd("cp", [ "-r", current_dir + "/IXWebSocket/build/ios/armv7/include", current_dir + "/IXWebSocket/build/ios/ixwebsocket-universal"])
-      elif base.is_dir(current_dir + "/IXWebSocket/build/armv64/include"):
-         base.cmd("cp", [ "-r", current_dir + "/IXWebSocket/build/ios/armv64/include", current_dir + "/IXWebSocket/build/ios/ixwebsocket-universal"])
-      elif base.is_dir(current_dir + "/IXWebSocket/build/i386/include"):
-         base.cmd("cp", [ "-r", current_dir + "/IXWebSocket/build/ios/i386/include", current_dir + "/IXWebSocket/build/ios/ixwebsocket-universal"])
-      elif base.is_dir(current_dir + "/IXWebSocket/build/ios/x86_64/include"):
-         base.cmd("cp", [ "-r", current_dir + "/IXWebSocket/build/ios/x86_64/include", current_dir + "/IXWebSocket/build/ios/ixwebsocket-universal"])
+      #copy include
+      prefix_dir = current_dir + "/IXWebSocket/build/ios/"
+      postfix_dir = ""
+      if base.is_dir(prefix_dir + "armv7/usr"):
+        postfix_dir = "/usr"
+
+      if base.is_dir(prefix_dir + "armv7" + postfix_dir + "/include"):
+         base.cmd("cp", [ "-r", prefix_dir + "armv7" + postfix_dir + "/include", current_dir + "/IXWebSocket/build/ios/ixwebsocket-universal"])
+      elif base.is_dir(prefix_dir + "armv64" + postfix_dir + "/include"):
+         base.cmd("cp", [ "-r", prefix_dir + "armv64" + postfix_dir + "/include", current_dir + "/IXWebSocket/build/ios/ixwebsocket-universal"])
+      elif base.is_dir(prefix_dir + "i386" + postfix_dir + "/include"):
+         base.cmd("cp", [ "-r", prefix_dir + "i386" + postfix_dir + "/include", current_dir + "/IXWebSocket/build/ios/ixwebsocket-universal"])
+      elif base.is_dir(prefix_dir + "x86_64" + postfix_dir + "/include"):
+         base.cmd("cp", [ "-r", prefix_dir + "x86_64" + postfix_dir + "/include", current_dir + "/IXWebSocket/build/ios/ixwebsocket-universal"])
 
       # Create fat lib
-      base.cmd("lipo", ["IXWebSocket/build/ios/armv7/lib/libixwebsocket.a", "IXWebSocket/build/ios/arm64/lib/libixwebsocket.a", 
-        "IXWebSocket/build/ios/i386/lib/libixwebsocket.a", "IXWebSocket/build/ios/x86_64/lib/libixwebsocket.a",
+      base.cmd("lipo", ["IXWebSocket/build/ios/armv7" + postfix_dir + "/lib/libixwebsocket.a", "IXWebSocket/build/ios/arm64" + postfix_dir + "/lib/libixwebsocket.a", 
+        "IXWebSocket/build/ios/i386" + postfix_dir + "/lib/libixwebsocket.a", "IXWebSocket/build/ios/x86_64" + postfix_dir + "/lib/libixwebsocket.a",
         "-create", "-output", 
          "IXWebSocket/build/ios/ixwebsocket-universal/lib/libixwebsocket.a"])
 
@@ -171,12 +180,16 @@ def make():
       os.chdir(current_dir_old)
       return
 
+    vsVersion = "14 2015"
+    if (config.option("vs-version") == "2019"):
+      vsVersion = "16 2019"
+
     if (-1 != config.option("platform").find("win_32")):
-      build_arch("windows", "win_32", ["-G","Visual Studio 14 2015", "-A", "Win32"])
-      build_arch("windows_debug", "win_32", ["-G","Visual Studio 14 2015", "-A", "Win32"], True)      
+      build_arch("windows", "win_32", ["-G","Visual Studio " + vsVersion, "-A", "Win32"])
+      build_arch("windows_debug", "win_32", ["-G","Visual Studio" + vsVersion, "-A", "Win32"], True)      
     if (-1 != config.option("platform").find("win_64")):
-      build_arch("windows", "win_64", ["-G","Visual Studio 14 2015 Win64"])
-      build_arch("windows_debug", "win_64", ["-G","Visual Studio 14 2015 Win64"], True)
+      build_arch("windows", "win_64", ["-G","Visual Studio " + vsVersion + " Win64"])
+      build_arch("windows_debug", "win_64", ["-G","Visual Studio " + vsVersion + " Win64"], True)
 
   os.chdir(current_dir_old)
   return
