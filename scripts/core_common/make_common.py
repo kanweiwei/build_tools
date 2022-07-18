@@ -38,7 +38,7 @@ def make():
   openssl.make()
   v8.make()
   html2.make()
-  hunspell.make()
+  hunspell.make(False)
   glew.make()
   if config.check_option("module", "mobile"):
     curl.make()

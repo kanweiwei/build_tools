@@ -12,6 +12,7 @@ import config
 import codecs
 import re
 import stat
+import io
 
 # common functions --------------------------------------
 def get_script_dir(file=""):
@@ -244,20 +245,20 @@ def copy_exe(src, dst, name):
 
 def replaceInFile(path, text, textReplace):
   filedata = ""
-  with open(get_path(path), "r", encoding="utf-8") as file:
+  with io.open(get_path(path), "r", encoding="utf-8") as file:
     filedata = file.read()
   filedata = filedata.replace(text, textReplace)
   delete_file(path)
-  with open(get_path(path), "w", encoding="utf-8") as file:
+  with io.open(get_path(path), "w", encoding="utf-8") as file:
     file.write(filedata)
   return
 def replaceInFileRE(path, pattern, textReplace):
   filedata = ""
-  with open(get_path(path), "r", encoding="utf-8") as file:
+  with io.open(get_path(path), "r", encoding="utf-8") as file:
     filedata = file.read()
   filedata = re.sub(pattern, textReplace, filedata)
   delete_file(path)
-  with open(get_path(path), "w", encoding="utf-8") as file:
+  with io.open(get_path(path), "w", encoding="utf-8") as file:
     file.write(filedata)
   return
 
@@ -265,14 +266,14 @@ def readFile(path):
   if not is_file(path):
     return ""
   filedata = ""
-  with open(get_path(path), "r", encoding="utf-8") as file:
+  with io.open(get_path(path), "r", encoding="utf-8") as file:
     filedata = file.read()
   return filedata
 
 def writeFile(path, data):
   if is_file(path):
     delete_file(path)
-  with open(get_path(path), "w", encoding="utf-8") as file:
+  with io.open(get_path(path), "w", encoding="utf-8") as file:
     file.write(data)
   return
 
@@ -966,7 +967,7 @@ def save_as_script(path, lines):
 def join_scripts(files, path):
   files_data = []
   for file in files:
-    with open(get_path(file), "r", encoding="utf-8") as content:
+    with io.open(get_path(file), "r", encoding="utf-8") as content:
       files_data.append(content.read())
 
   dst_content = "\n".join(files_data)
@@ -1136,12 +1137,12 @@ def support_old_versions_plugins(out_dir):
   download("https://onlyoffice.github.io/sdkjs-plugins/v1/plugins-ui.js", out_dir + "/plugins-ui.js")
   download("https://onlyoffice.github.io/sdkjs-plugins/v1/plugins.css", out_dir + "/plugins.css")
   content_plugin_base = ""
-  with open(get_path(out_dir + "/plugins.js"), "r", encoding="utf-8") as file:
+  with io.open(get_path(out_dir + "/plugins.js"), "r", encoding="utf-8") as file:
     content_plugin_base += file.read()
   content_plugin_base += "\n\n"
-  with open(get_path(out_dir + "/plugins-ui.js"), "r", encoding="utf-8") as file:
+  with io.open(get_path(out_dir + "/plugins-ui.js"), "r", encoding="utf-8") as file:
     content_plugin_base += file.read()  
-  with open(get_path(out_dir + "/pluginBase.js"), "w", encoding="utf-8") as file:
+  with io.open(get_path(out_dir + "/pluginBase.js"), "w", encoding="utf-8") as file:
     file.write(content_plugin_base)
   delete_file(out_dir + "/plugins.js")
   delete_file(out_dir + "/plugins-ui.js")  
@@ -1158,7 +1159,7 @@ def hack_xcode_ios():
   qmake_spec_file = config.option("qt-dir") + "/ios/mkspecs/macx-ios-clang/qmake.conf"
 
   filedata = ""
-  with open(get_path(qmake_spec_file), "r", encoding="utf-8") as file:
+  with io.open(get_path(qmake_spec_file), "r", encoding="utf-8") as file:
     filedata = file.read()
 
   content_hack = "QMAKE_CXXFLAGS += -arch $$QT_ARCH"
@@ -1170,7 +1171,7 @@ def hack_xcode_ios():
   filedata += "\n\n"
   
   delete_file(qmake_spec_file)
-  with open(get_path(qmake_spec_file), "w", encoding="utf-8") as file:
+  with io.open(get_path(qmake_spec_file), "w", encoding="utf-8") as file:
     file.write(filedata)
   return
 
